@@ -1,0 +1,119 @@
+close all
+clear all
+clc
+
+importdata("hw2_dataProblem.txt"); % data imported
+
+L = ans.data(:, 1); 
+P = ans.data(:, 2);
+D = ans.data(:,3);
+
+gscatter(L, P, D) % spread of data
+data = [L P D];
+k = [1 15 25 45 55 65 75];
+
+r1=[1 2 3 4 5 6 7]; 
+r = (3.14*r1.^2);
+
+true_positive_r(1:7) = (0);
+true_negative_r(1:7) = (0);
+false_positive_r(1:7) = (0);
+false_negative_r(1:7)= (0);
+
+true_positive(1:7) = (0);
+true_negative(1:7) = (0);
+false_positive(1:7) = (0);
+false_negative(1:7)= (0);
+
+
+
+for ki = 1:length(k)
+    
+    for Len = 1:length(L)
+        test_point = data(Len, 1:2);
+        test_pointclass = data(Len, 3);
+        neighbor_data = data;
+        neighbor_data(Len, :) = [];
+        
+        for i = 1:length(neighbor_data)
+            distance (i,1) = norm(test_point-neighbor_data(i,1:2));
+            distance (i,2) = neighbor_data(i, 3);
+        end
+        
+        % For k = 1
+        sort_distance = sortrows(distance);
+        sort_distance_1 = mode(sort_distance(1:k(ki), 2));
+        
+        if data(Len, 3) == sort_distance_1
+            if sort_distance_1 == 0
+                true_negative(ki) = true_negative(ki) + 1;
+            end
+            if sort_distance_1 == 1
+                true_positive(ki) = true_positive(ki) + 1;
+            end
+        end
+        if data(Len, 3) ~= sort_distance_1
+            if data(Len, 3) == 0 && sort_distance_1 == 1
+                false_negative(ki) = false_negative(ki) + 1;
+            end
+            if data(Len, 3) == 1 && sort_distance_1 == 0
+                false_positive(ki) = false_positive(ki) + 1;
+            end
+        end
+    end
+end
+hit_rate = (true_positive + true_negative)./ (true_positive + true_negative + false_negative + false_positive);
+
+for ri = 1:length(r)
+    
+    for Len = 1:length(L)
+        test_point = data(Len, 1:2);
+        test_pointclass = data(Len, 3);
+        neighbor_data = data;
+        neighbor_data(Len, :) = [];
+        
+        for i = 1:length(neighbor_data)
+            distance (i,1) = norm(test_point-neighbor_data(i,1:2));
+            distance (i,2) = neighbor_data(i, 3);
+        end
+        
+        % For k = 1
+        sort_distance = sortrows(distance);
+        sort_distance_1 = mode(sort_distance(1:r(ri), 2));
+        
+        if data(Len, 3) == sort_distance_1
+            if sort_distance_1 == 0
+                true_negative_r(ri) = true_negative_r(ri) + 1;
+            end
+            if sort_distance_1 == 1
+                true_positive_r(ri) = true_positive_r(ri) + 1;
+            end
+        end
+        if data(Len, 3) ~= sort_distance_1
+            if data(Len, 3) == 0 && sort_distance_1 == 1
+                false_negative_r(ri) = false_negative_r(ri) + 1;
+            end
+            if data(Len, 3) == 1 && sort_distance_1 == 0
+                false_positive_r(ri) = false_positive_r(ri) + 1;
+            end
+        end
+    end
+end
+
+hit_rate_r = (true_positive_r + true_negative_r)./ (true_positive_r + true_negative_r + false_negative_r + false_positive_r);
+
+
+figure(1)
+plot(k, hit_rate)
+xlabel('K values');
+ylabel('hitrate for KNN classifier');
+title('hitrate vs. k');
+
+figure(2)
+plot(r, hit_rate_r)
+xlabel('Radius values');
+ylabel('hitrate for neighborhood classifier ');
+title('hitrate vs. radius');
+
+
+ 
